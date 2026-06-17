@@ -5,7 +5,7 @@ import styles from './index.module.scss';
 import StatusBadge from '@/components/StatusBadge';
 import { useUserStore } from '@/store/useUserStore';
 import { useBookingStore } from '@/store/useBookingStore';
-import { formatDate } from '@/utils/date';
+import { formatDate, timeToMinutes } from '@/utils/date';
 import type { Booking, BookingStatus } from '@/types/booking';
 
 const roleMap = {
@@ -26,13 +26,22 @@ const tabFilters: { label: string; key: TabFilterKey }[] = [
   { label: '已驳回', key: 'rejected' }
 ];
 
+const isCheckInTimeReached = (booking: Booking): boolean => {
+  const now = new Date();
+  const todayStr = formatDate(now, 'YYYY-MM-DD');
+  if (booking.date < todayStr) return true;
+  if (booking.date > todayStr) return false;
+  const nowMinutes = now.getHours() * 60 + now.getMinutes();
+  const startMinutes = timeToMinutes(booking.startTime);
+  return nowMinutes >= startMinutes - 15;
+};
+
 const MinePage: React.FC = () => {
   const currentUser = useUserStore((state) => state.currentUser);
   const borrowRecords = useUserStore((state) => state.getUserBorrowRecords(currentUser.id));
   const getUserBookings = useBookingStore((state) => state.getUserBookings);
   const checkIn = useBookingStore((state) => state.checkIn);
   const checkOut = useBookingStore((state) => state.checkOut);
-  const cancelBooking = useBookingStore((state) => state.cancelBooking);
   const [activeTab, setActiveTab] = useState<TabFilterKey>('all');
   const [refreshing, setRefreshing] = useState(false);
 
@@ -72,7 +81,6 @@ const MinePage: React.FC = () => {
   }, [myBookings, activeTab]);
 
   usePullDownRefresh(() => {
-    console.log('[MinePage] Pull to refresh');
     setRefreshing(true);
     setTimeout(() => {
       setRefreshing(false);
@@ -85,12 +93,19 @@ const MinePage: React.FC = () => {
   });
 
   const handleBookingClick = (booking: Booking) => {
-    console.log('[MinePage] Booking clicked:', booking.bookingNo);
     Taro.navigateTo({ url: `/pages/bookingDetail/index?id=${booking.id}` });
   };
 
   const handleCheckIn = (booking: Booking, e: any) => {
     e.stopPropagation();
+    if (!isCheckInTimeReached(booking)) {
+      Taro.showToast({
+        title: `未到签到时间，${booking.startTime} 前可签到`,
+        icon: 'none',
+        duration: 2500
+      });
+      return;
+    }
     Taro.showModal({
       title: '确认签到',
       content: `确认签到使用「${booking.room.name}」？`,
@@ -105,6 +120,15 @@ const MinePage: React.FC = () => {
 
   const handleCheckOut = (booking: Booking, e: any) => {
     e.stopPropagation();
+    const unreturnedItems = booking.equipmentUsage?.filter((eq) => eq.borrowed && !eq.returned);
+    if (unreturnedItems && unreturnedItems.length > 0) {
+      Taro.showToast({
+        title: `还有${unreturnedItems.length}件设备未归还，请先归还`,
+        icon: 'none',
+        duration: 2500
+      });
+      return;
+    }
     Taro.showModal({
       title: '确认签退',
       content: '确认使用完毕并签退？',
@@ -117,18 +141,28 @@ const MinePage: React.FC = () => {
     });
   };
 
-  const handleCancel = (booking: Booking, e: any) => {
+  const handleEditBooking = (booking: Booking, e: any) => {
     e.stopPropagation();
-    Taro.navigateTo({ url: `/pages/bookingDetail/index?id=${booking.id}` });
+    const params = [
+      `editBookingId=${booking.id}`,
+      `roomId=${booking.roomId}`,
+      `date=${booking.date}`,
+      `startTime=${booking.startTime}`,
+      `endTime=${booking.endTime}`,
+      `purpose=${encodeURIComponent(booking.purpose)}`,
+      `participantCount=${booking.participantCount}`,
+      `participants=${encodeURIComponent(booking.participants.join(','))}`,
+      `equipmentNeeds=${encodeURIComponent(booking.equipmentNeeds.join(','))}`,
+      `remarks=${encodeURIComponent(booking.remarks || '')}`
+    ].join('&');
+    Taro.navigateTo({ url: `/pages/bookingForm/index?${params}` });
   };
 
   const handleViewAllBookings = () => {
-    console.log('[MinePage] View all bookings');
     Taro.switchTab({ url: '/pages/booking/index' });
   };
 
   const handleMenuClick = (type: string) => {
-    console.log('[MinePage] Menu clicked:', type);
     switch (type) {
       case 'myBookings':
         Taro.switchTab({ url: '/pages/booking/index' });
@@ -155,12 +189,18 @@ const MinePage: React.FC = () => {
     const canCheckIn = booking.status === 'approved';
     const canCheckOut = booking.status === 'checked_in';
     const canCancel = ['pending_leader', 'pending_counselor', 'pending_admin', 'approved'].includes(booking.status);
+    const checkInReached = canCheckIn && isCheckInTimeReached(booking);
 
     return (
       <View className={styles.actionRow}>
-        {canCheckIn && (
+        {canCheckIn && checkInReached && (
           <View className={styles.actionBtnPrimary} onClick={(e) => handleCheckIn(booking, e)}>
             <Text>签到</Text>
+          </View>
+        )}
+        {canCheckIn && !checkInReached && (
+          <View className={styles.actionBtnDisabled}>
+            <Text>未到签到时间</Text>
           </View>
         )}
         {canCheckOut && (
@@ -169,17 +209,17 @@ const MinePage: React.FC = () => {
           </View>
         )}
         {canCancel && (
-          <View className={styles.actionBtnSecondary} onClick={(e) => handleCancel(booking, e)}>
+          <View className={styles.actionBtnSecondary} onClick={(e) => { e.stopPropagation(); handleBookingClick(booking); }}>
             <Text>详情</Text>
           </View>
         )}
         {booking.status === 'rejected' && (
-          <View className={styles.actionBtnSecondary} onClick={(e) => handleCancel(booking, e)}>
+          <View className={styles.actionBtnPrimary} onClick={(e) => handleEditBooking(booking, e)}>
             <Text>重新编辑</Text>
           </View>
         )}
         {booking.status === 'completed' && (
-          <View className={styles.actionBtnSecondary} onClick={(e) => handleCancel(booking, e)}>
+          <View className={styles.actionBtnSecondary} onClick={(e) => { e.stopPropagation(); handleBookingClick(booking); }}>
             <Text>查看详情</Text>
           </View>
         )}

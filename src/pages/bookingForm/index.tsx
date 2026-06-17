@@ -5,20 +5,29 @@ import styles from './index.module.scss';
 import { useRoomStore } from '@/store/useRoomStore';
 import { useBookingStore } from '@/store/useBookingStore';
 import { useUserStore } from '@/store/useUserStore';
-import { getDateList, getDayOfWeek, formatDate } from '@/utils/date';
+import { getDateList, getDayOfWeek, formatDate, getToday } from '@/utils/date';
 import { checkBookingConflict, checkTimeRangeValid } from '@/utils/conflict';
 import { mockEquipmentOptions } from '@/data/rooms';
 import type { BookingFormData } from '@/types/booking';
 
 const BookingFormPage: React.FC = () => {
   const router = useRouter();
+  const editBookingId = router.params.editBookingId as string;
   const roomId = router.params.roomId as string;
   const initialDate = router.params.date as string;
   const initialStartTime = router.params.startTime as string;
   const initialEndTime = router.params.endTime as string;
+  const initialPurpose = router.params.purpose ? decodeURIComponent(router.params.purpose as string) : '';
+  const initialParticipantCount = router.params.participantCount ? parseInt(router.params.participantCount as string, 10) : 0;
+  const initialParticipants = router.params.participants ? decodeURIComponent(router.params.participants as string).split(',').filter(Boolean) : [];
+  const initialEquipmentNeeds = router.params.equipmentNeeds ? decodeURIComponent(router.params.equipmentNeeds as string).split(',').filter(Boolean) : [];
+  const initialRemarks = router.params.remarks ? decodeURIComponent(router.params.remarks as string) : '';
+
+  const isEditMode = !!editBookingId;
 
   const getRoomById = useRoomStore((state) => state.getRoomById);
   const addBooking = useBookingStore((state) => state.addBooking);
+  const resubmitBooking = useBookingStore((state) => state.resubmitBooking);
   const bookings = useBookingStore((state) => state.bookings);
   const currentUser = useUserStore((state) => state.currentUser);
 
@@ -34,11 +43,11 @@ const BookingFormPage: React.FC = () => {
     date: initialDate || dateList[0],
     startTime: defaultStartTime,
     endTime: defaultEndTime,
-    purpose: '',
-    participantCount: 2,
-    participants: [],
-    equipmentNeeds: [],
-    remarks: ''
+    purpose: initialPurpose || '',
+    participantCount: initialParticipantCount || 2,
+    participants: initialParticipants,
+    equipmentNeeds: initialEquipmentNeeds,
+    remarks: initialRemarks || ''
   });
 
   const [conflictInfo, setConflictInfo] = useState<{ hasConflict: boolean; message: string }>({
@@ -61,7 +70,8 @@ const BookingFormPage: React.FC = () => {
       formData.date,
       formData.startTime,
       formData.endTime,
-      bookings
+      bookings,
+      editBookingId
     );
     setConflictInfo({ hasConflict: conflict.hasConflict, message: conflict.message });
 
@@ -72,10 +82,9 @@ const BookingFormPage: React.FC = () => {
       room.closeTime
     );
     setTimeValid(valid);
-  }, [formData.roomId, formData.date, formData.startTime, formData.endTime, bookings, room]);
+  }, [formData.roomId, formData.date, formData.startTime, formData.endTime, bookings, room, editBookingId]);
 
   useDidShow(() => {
-    console.log('[BookingFormPage] Page shown');
     if (!room) {
       Taro.showToast({ title: '研讨间不存在', icon: 'none' });
     }
@@ -95,12 +104,10 @@ const BookingFormPage: React.FC = () => {
   }, [formData, conflictInfo, timeValid]);
 
   const handleDateSelect = (date: string) => {
-    console.log('[BookingFormPage] Date selected:', date);
     setFormData((prev) => ({ ...prev, date }));
   };
 
   const handleTimeChange = (field: 'startTime' | 'endTime', value: string) => {
-    console.log('[BookingFormPage] Time changed:', { field, value });
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -161,28 +168,36 @@ const BookingFormPage: React.FC = () => {
       return;
     }
 
-    console.log('[BookingFormPage] Submitting booking:', formData);
-
     try {
-      const newBooking = addBooking(formData, currentUser, room);
-      console.log('[BookingFormPage] Booking created:', newBooking.bookingNo);
-      Taro.showModal({
-        title: '提交成功',
-        content: `预约申请已提交，预约号：${newBooking.bookingNo}\n请等待审批：组长→辅导员→管理员`,
-        showCancel: false,
-        confirmText: '我知道了',
-        success: () => {
-          Taro.navigateBack();
-        }
-      });
+      if (isEditMode && editBookingId) {
+        const updated = resubmitBooking(editBookingId, formData, currentUser, room);
+        Taro.showModal({
+          title: '重新提交成功',
+          content: `预约已重新提交，预约号：${updated.bookingNo}\n请等待审批：组长→辅导员→管理员`,
+          showCancel: false,
+          confirmText: '我知道了',
+          success: () => {
+            Taro.navigateBack();
+          }
+        });
+      } else {
+        const newBooking = addBooking(formData, currentUser, room);
+        Taro.showModal({
+          title: '提交成功',
+          content: `预约申请已提交，预约号：${newBooking.bookingNo}\n请等待审批：组长→辅导员→管理员`,
+          showCancel: false,
+          confirmText: '我知道了',
+          success: () => {
+            Taro.navigateBack();
+          }
+        });
+      }
     } catch (error: any) {
-      console.error('[BookingFormPage] Submit failed:', error);
       Taro.showToast({ title: error.message || '提交失败', icon: 'none' });
     }
   };
 
   const handleCancel = () => {
-    console.log('[BookingFormPage] Cancel clicked');
     Taro.showModal({
       title: '确认取消',
       content: '取消后已填写的信息将丢失，确认取消吗？',
@@ -207,6 +222,13 @@ const BookingFormPage: React.FC = () => {
   return (
     <ScrollView className={styles.pageContainer} scrollY>
       <View className={styles.content}>
+        {isEditMode && (
+          <View className={styles.editModeBanner}>
+            <Text className={styles.editModeIcon}>✏️</Text>
+            <Text className={styles.editModeText}>编辑模式 - 修改后需重新提交审批</Text>
+          </View>
+        )}
+
         {conflictInfo.hasConflict && (
           <View className={styles.conflictAlert}>
             <Text className={styles.conflictIcon}>⚠️</Text>
@@ -347,14 +369,14 @@ const BookingFormPage: React.FC = () => {
               >
                 <Text>+</Text>
               </View>
-              <Text style={{ fontSize: '$font-size-sm', color: '$color-text-tertiary' }}>
+              <Text style={{ fontSize: '24rpx', color: '#8C8C8C' }}>
                 (最多{room.capacity}人)
               </Text>
             </View>
           </View>
           <View className={styles.formItem}>
             <Text className={styles.formLabel}>参会人员</Text>
-            <View style={{ display: 'flex', gap: '$spacing-sm', marginBottom: '$spacing-sm' }}>
+            <View style={{ display: 'flex', gap: '16rpx', marginBottom: '16rpx' }}>
               <Input
                 className={styles.formInput}
                 style={{ flex: 1 }}
@@ -365,11 +387,11 @@ const BookingFormPage: React.FC = () => {
               />
               <View
                 style={{
-                  padding: '$spacing-sm $spacing-lg',
-                  backgroundColor: '$color-primary',
-                  borderRadius: '$radius-md',
-                  color: '$color-text-white',
-                  fontSize: '$font-size-md'
+                  padding: '16rpx 32rpx',
+                  backgroundColor: '#1890FF',
+                  borderRadius: '16rpx',
+                  color: '#fff',
+                  fontSize: '28rpx'
                 }}
                 onClick={handleParticipantAdd}
               >
@@ -460,7 +482,7 @@ const BookingFormPage: React.FC = () => {
           className={`${styles.btnSubmit} ${!isFormValid ? styles.disabled : ''}`}
           onClick={handleSubmit}
         >
-          <Text>提交申请</Text>
+          <Text>{isEditMode ? '重新提交' : '提交申请'}</Text>
         </View>
       </View>
     </ScrollView>

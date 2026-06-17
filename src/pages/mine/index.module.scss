@@ -446,3 +446,13 @@
     background-color: $color-bg-hover;
   }
 }
+
+.actionBtnDisabled {
+  padding: $spacing-xs $spacing-lg;
+  background-color: $color-text-tertiary;
+  border-radius: $radius-md;
+  color: $color-text-white;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  opacity: 0.6;
+}

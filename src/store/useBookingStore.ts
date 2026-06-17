@@ -14,6 +14,7 @@ interface BookingState {
   loading: boolean;
   error: string | null;
   addBooking: (formData: BookingFormData, user: User, room: Room) => Booking;
+  resubmitBooking: (bookingId: string, formData: BookingFormData, user: User, room: Room) => Booking;
   updateBookingStatus: (id: string, status: BookingStatus, updates?: Partial<Booking>) => void;
   cancelBooking: (id: string, reason: string, user: User) => void;
   getBookingById: (id: string) => Booking | undefined;
@@ -91,6 +92,65 @@ export const useBookingStore = create<BookingState>((set, get) => ({
 
     console.log('[BookingStore] Booking created:', newBooking.bookingNo);
     return newBooking;
+  },
+
+  resubmitBooking: (bookingId, formData, user, room) => {
+    console.log('[BookingStore] Resubmitting booking:', bookingId);
+
+    const conflict = checkBookingConflict(
+      formData.roomId,
+      formData.date,
+      formData.startTime,
+      formData.endTime,
+      get().bookings,
+      bookingId
+    );
+
+    if (conflict.hasConflict) {
+      throw new Error(conflict.message);
+    }
+
+    const timeValid = checkTimeRangeValid(
+      formData.startTime,
+      formData.endTime,
+      room.openTime,
+      room.closeTime
+    );
+
+    if (!timeValid.valid) {
+      throw new Error(timeValid.message);
+    }
+
+    const approvalRecord = createApprovalRecord(bookingId);
+
+    set((state) => ({
+      bookings: state.bookings.map((b) =>
+        b.id === bookingId
+          ? {
+              ...b,
+              roomId: formData.roomId,
+              room,
+              date: formData.date,
+              startTime: formData.startTime,
+              endTime: formData.endTime,
+              purpose: formData.purpose,
+              participantCount: formData.participantCount,
+              participants: formData.participants,
+              equipmentNeeds: formData.equipmentNeeds,
+              remarks: formData.remarks,
+              status: getBookingStatusForApprovalNode(0),
+              approvalRecord,
+              rejectedReason: undefined,
+              rejectedBy: undefined,
+              updatedAt: new Date().toISOString()
+            }
+          : b
+      )
+    }));
+
+    const updated = get().getBookingById(bookingId);
+    console.log('[BookingStore] Booking resubmitted:', updated?.bookingNo);
+    return updated!;
   },
 
   updateBookingStatus: (id, status, updates) => {

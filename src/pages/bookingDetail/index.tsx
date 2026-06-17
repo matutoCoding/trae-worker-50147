@@ -5,10 +5,20 @@ import styles from './index.module.scss';
 import StatusBadge from '@/components/StatusBadge';
 import { useBookingStore } from '@/store/useBookingStore';
 import { useUserStore } from '@/store/useUserStore';
-import { formatDate, formatDateTime } from '@/utils/date';
+import { formatDate, formatDateTime, timeToMinutes } from '@/utils/date';
 import { BOOKING_STATUS_MAP } from '@/types/booking';
 import type { Booking, EquipmentUsageItem } from '@/types/booking';
 import { mockEquipmentOptions } from '@/data/rooms';
+
+const isCheckInTimeReached = (booking: Booking): boolean => {
+  const now = new Date();
+  const todayStr = formatDate(now, 'YYYY-MM-DD');
+  if (booking.date < todayStr) return true;
+  if (booking.date > todayStr) return false;
+  const nowMinutes = now.getHours() * 60 + now.getMinutes();
+  const startMinutes = timeToMinutes(booking.startTime);
+  return nowMinutes >= startMinutes - 15;
+};
 
 const BookingDetailPage: React.FC = () => {
   const router = useRouter();
@@ -39,12 +49,10 @@ const BookingDetailPage: React.FC = () => {
   };
 
   useDidShow(() => {
-    console.log('[BookingDetailPage] Page shown, bookingId:', bookingId);
     loadBooking();
   });
 
   usePullDownRefresh(() => {
-    console.log('[BookingDetailPage] Pull to refresh');
     setRefreshing(true);
     setTimeout(() => {
       loadBooking();
@@ -55,7 +63,6 @@ const BookingDetailPage: React.FC = () => {
 
   const handleCancel = () => {
     if (!booking) return;
-    console.log('[BookingDetailPage] Cancel clicked:', booking.bookingNo);
     setShowCancelModal(true);
   };
 
@@ -65,18 +72,22 @@ const BookingDetailPage: React.FC = () => {
       Taro.showToast({ title: '请输入取消原因', icon: 'none' });
       return;
     }
-    console.log('[BookingDetailPage] Confirm cancel:', { reason: cancelReason });
     cancelBooking(booking.id, cancelReason, currentUser);
     setShowCancelModal(false);
     Taro.showToast({ title: '已取消预约', icon: 'success' });
-    setTimeout(() => {
-      loadBooking();
-    }, 500);
+    setTimeout(() => loadBooking(), 500);
   };
 
   const handleCheckIn = () => {
     if (!booking) return;
-    console.log('[BookingDetailPage] Check in:', booking.bookingNo);
+    if (!isCheckInTimeReached(booking)) {
+      Taro.showToast({
+        title: `未到签到时间，${booking.startTime} 前可签到`,
+        icon: 'none',
+        duration: 2500
+      });
+      return;
+    }
     Taro.showModal({
       title: '确认签到',
       content: `确认签到使用「${booking.room.name}」？`,
@@ -84,9 +95,7 @@ const BookingDetailPage: React.FC = () => {
         if (res.confirm) {
           checkIn(booking.id);
           Taro.showToast({ title: '签到成功', icon: 'success' });
-          setTimeout(() => {
-            loadBooking();
-          }, 500);
+          setTimeout(() => loadBooking(), 500);
         }
       }
     });
@@ -99,7 +108,6 @@ const BookingDetailPage: React.FC = () => {
       Taro.showToast({ title: '请先归还所有借用设备', icon: 'none' });
       return;
     }
-    console.log('[BookingDetailPage] Check out:', booking.bookingNo);
     Taro.showModal({
       title: '确认签退',
       content: '确认使用完毕并签退？请确保设备已归还、房间整洁。',
@@ -107,9 +115,7 @@ const BookingDetailPage: React.FC = () => {
         if (res.confirm) {
           checkOut(booking.id);
           Taro.showToast({ title: '签退成功', icon: 'success' });
-          setTimeout(() => {
-            loadBooking();
-          }, 500);
+          setTimeout(() => loadBooking(), 500);
         }
       }
     });
@@ -117,8 +123,19 @@ const BookingDetailPage: React.FC = () => {
 
   const handleEdit = () => {
     if (!booking) return;
-    console.log('[BookingDetailPage] Edit clicked:', booking.bookingNo);
-    Taro.showToast({ title: '驳回后可修改', icon: 'none' });
+    const params = [
+      `editBookingId=${booking.id}`,
+      `roomId=${booking.roomId}`,
+      `date=${booking.date}`,
+      `startTime=${booking.startTime}`,
+      `endTime=${booking.endTime}`,
+      `purpose=${encodeURIComponent(booking.purpose)}`,
+      `participantCount=${booking.participantCount}`,
+      `participants=${encodeURIComponent(booking.participants.join(','))}`,
+      `equipmentNeeds=${encodeURIComponent(booking.equipmentNeeds.join(','))}`,
+      `remarks=${encodeURIComponent(booking.remarks || '')}`
+    ].join('&');
+    Taro.navigateTo({ url: `/pages/bookingForm/index?${params}` });
   };
 
   const handleGoToApproval = () => {
@@ -220,6 +237,7 @@ const BookingDetailPage: React.FC = () => {
   const canCheckOut = isOwner && booking.status === 'checked_in';
   const canEdit = booking.status === 'rejected' && isOwner;
   const canManageUsage = isOwner && (booking.status === 'checked_in' || booking.status === 'completed');
+  const checkInTimeReached = canCheckIn && isCheckInTimeReached(booking);
   const showActions = canCancel || canCheckIn || canCheckOut || canEdit;
 
   const equipmentUsageList = booking.equipmentUsage && booking.equipmentUsage.length > 0
@@ -248,7 +266,23 @@ const BookingDetailPage: React.FC = () => {
           </Text>
         </View>
 
-        {canCheckIn && (
+        {canCheckIn && !checkInTimeReached && (
+          <View className={styles.quickActionCardDisabled}>
+            <View className={styles.quickActionLeft}>
+              <Text className={styles.quickActionIcon}>✋</Text>
+              <View>
+                <Text className={styles.quickActionTitleDisabled}>未到签到时间</Text>
+                <Text className={styles.quickActionDescDisabled}>
+                  {booking.date > formatDate(new Date(), 'YYYY-MM-DD')
+                    ? `预约日期为${formatDate(booking.date, 'MM月DD日')}，当天 ${booking.startTime} 前可签到`
+                    : `${booking.startTime} 前可签到，请稍后再来`}
+                </Text>
+              </View>
+            </View>
+          </View>
+        )}
+
+        {checkInTimeReached && (
           <View className={styles.quickActionCard} onClick={handleCheckIn}>
             <View className={styles.quickActionLeft}>
               <Text className={styles.quickActionIcon}>✋</Text>
@@ -292,7 +326,7 @@ const BookingDetailPage: React.FC = () => {
               <Text className={styles.infoLabel}>参会人数</Text>
               <Text className={styles.infoValue}>
                 预约 {booking.participantCount} 人
-                {booking.actualAttendanceCount !== undefined && booking.status !== 'approved' && booking.status !== 'pending_leader' && (
+                {booking.actualAttendanceCount !== undefined && booking.status !== 'approved' && (
                   <Text className={styles.infoValueHighlight}> ，实际到场 {booking.actualAttendanceCount} 人</Text>
                 )}
               </Text>
@@ -337,13 +371,13 @@ const BookingDetailPage: React.FC = () => {
                 <Text className={styles.sectionIcon}>👥</Text>
                 实际到场人数
               </Text>
-              {booking.status === 'checked_in' && !showAttendanceEdit && (
+              {!showAttendanceEdit && (
                 <Text className={styles.editLink} onClick={() => setShowAttendanceEdit(true)}>
                   {booking.actualAttendanceCount !== undefined ? '修改' : '补充'}
                 </Text>
               )}
             </View>
-            {showAttendanceEdit && booking.status === 'checked_in' ? (
+            {showAttendanceEdit ? (
               <View className={styles.attendanceEdit}>
                 <Input
                   type="number"
@@ -367,7 +401,7 @@ const BookingDetailPage: React.FC = () => {
                 <Text className={styles.infoValue}>
                   {booking.actualAttendanceCount !== undefined
                     ? `${booking.actualAttendanceCount} 人`
-                    : <Text style={{ color: '#999' }}>暂未登记</Text>}
+                    : <Text style={{ color: '#999' }}>暂未登记，点击"补充"填写</Text>}
                 </Text>
               </View>
             )}
@@ -384,13 +418,9 @@ const BookingDetailPage: React.FC = () => {
               </Text>
             </View>
             {!booking.equipmentUsage || booking.equipmentUsage.length === 0 ? (
-              booking.status === 'checked_in' ? (
-                <View className={styles.initEquipmentBtn} onClick={initEquipmentUsage}>
-                  <Text>初始化设备列表</Text>
-                </View>
-              ) : (
-                <Text style={{ color: '#999', fontSize: '26rpx' }}>暂无设备借用记录</Text>
-              )
+              <View className={styles.initEquipmentBtn} onClick={initEquipmentUsage}>
+                <Text>初始化设备列表</Text>
+              </View>
             ) : (
               <View className={styles.equipmentList}>
                 {equipmentUsageList.map((eq) => (
@@ -427,6 +457,16 @@ const BookingDetailPage: React.FC = () => {
                         ) : null}
                       </View>
                     )}
+                    {booking.status === 'completed' && !eq.borrowed && (
+                      <View className={styles.btnEqBorrow} onClick={() => handleEquipmentBorrow(eq.equipmentId)}>
+                        <Text>补登借出</Text>
+                      </View>
+                    )}
+                    {booking.status === 'completed' && eq.borrowed && !eq.returned && (
+                      <View className={styles.btnEqReturn} onClick={() => handleEquipmentReturn(eq.equipmentId)}>
+                        <Text>补登归还</Text>
+                      </View>
+                    )}
                   </View>
                 ))}
               </View>
@@ -434,7 +474,7 @@ const BookingDetailPage: React.FC = () => {
           </View>
         )}
 
-        {(booking.checkInTime || booking.checkOutTime || booking.status === 'checked_in') && (
+        {(booking.checkInTime || booking.checkOutTime || booking.status === 'checked_in' || booking.status === 'completed') && (
           <View className={styles.infoCard}>
             <Text className={styles.sectionTitle}>
               <Text className={styles.sectionIcon}>⏰</Text>
@@ -495,7 +535,7 @@ const BookingDetailPage: React.FC = () => {
               <Text className={styles.editLink} onClick={handleGoToApproval}>查看详情</Text>
             </View>
             <View className={styles.approvalFlow}>
-              {booking.approvalRecord.nodes.map((node, index) => {
+              {booking.approvalRecord.nodes.map((node) => {
                 const isCurrent = node.status === 'pending';
                 return (
                   <View
@@ -551,9 +591,14 @@ const BookingDetailPage: React.FC = () => {
               <Text>重新编辑</Text>
             </View>
           )}
-          {canCheckIn && (
+          {canCheckIn && checkInTimeReached && (
             <View className={styles.btnPrimary} onClick={handleCheckIn}>
               <Text>立即签到</Text>
+            </View>
+          )}
+          {canCheckIn && !checkInTimeReached && (
+            <View className={`${styles.btnPrimary} ${styles.disabled}`}>
+              <Text>未到签到时间</Text>
             </View>
           )}
           {canCheckOut && (

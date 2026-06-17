@@ -10,6 +10,27 @@
   padding: $spacing-md $page-padding;
 }
 
+.editModeBanner {
+  background-color: rgba($color-warning, 0.1);
+  border: 2rpx solid rgba($color-warning, 0.3);
+  border-radius: $radius-md;
+  padding: $spacing-md $spacing-lg;
+  margin-bottom: $spacing-md;
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.editModeIcon {
+  font-size: $font-size-lg;
+}
+
+.editModeText {
+  font-size: $font-size-sm;
+  color: $color-warning;
+  font-weight: $font-weight-medium;
+}
+
 .formSection {
   background-color: $color-bg-card;
   border-radius: $radius-lg;
