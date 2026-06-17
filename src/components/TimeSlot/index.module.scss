@@ -1,0 +1,66 @@
+@use '@/styles/variables.scss' as *;
+
+.timeSlot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-md $spacing-sm;
+  border-radius: $radius-md;
+  border: 2rpx solid transparent;
+  transition: all $transition-base;
+  min-height: 120rpx;
+  position: relative;
+
+  &.available {
+    background-color: $color-bg-card;
+    border-color: $color-border;
+    cursor: pointer;
+
+    &:active {
+      transform: scale(0.95);
+      border-color: $color-primary;
+    }
+  }
+
+  &.selected {
+    background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+    border-color: $color-primary;
+
+    .timeText,
+    .timeDivider {
+      color: $color-text-white;
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+  }
+
+  &.unavailable {
+    background-color: $color-bg-page;
+    border-color: $color-border;
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.timeText {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+}
+
+.timeDivider {
+  width: 40rpx;
+  height: 1rpx;
+  background-color: $color-border;
+  margin: $spacing-xs 0;
+}
+
+.conflictHint {
+  position: absolute;
+  bottom: 4rpx;
+  font-size: 20rpx;
+  color: $color-error;
+  @include text-ellipsis;
+  max-width: 100%;
+  padding: 0 $spacing-xs;
+}

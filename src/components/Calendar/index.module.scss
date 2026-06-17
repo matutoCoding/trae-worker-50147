@@ -1,0 +1,137 @@
+@use '@/styles/variables.scss' as *;
+
+.calendar {
+  background-color: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+}
+
+.calendarHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-lg;
+}
+
+.navBtn {
+  width: 64rpx;
+  height: 64rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all $transition-base;
+
+  &:active {
+    background-color: $color-bg-page;
+  }
+}
+
+.navIcon {
+  font-size: 48rpx;
+  color: $color-text-secondary;
+  font-weight: $font-weight-light;
+}
+
+.monthText {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.weekHeader {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: $spacing-md;
+}
+
+.weekDay {
+  text-align: center;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  padding: $spacing-sm 0;
+  font-weight: $font-weight-medium;
+
+  &.weekend {
+    color: $color-error;
+  }
+}
+
+.daysGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: $spacing-xs;
+}
+
+.dayCell {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: $radius-sm;
+  position: relative;
+  transition: all $transition-base;
+
+  &.currentMonth {
+    .dayNumber {
+      color: $color-text-primary;
+    }
+  }
+
+  &.otherMonth {
+    opacity: 0.3;
+    .dayNumber {
+      color: $color-text-tertiary;
+    }
+  }
+
+  &.selected {
+    background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+
+    .dayNumber {
+      color: $color-text-white;
+      font-weight: $font-weight-semibold;
+    }
+
+    .todayDot {
+      background-color: $color-text-white;
+    }
+  }
+
+  &.today {
+    border: 2rpx solid $color-primary;
+    .dayNumber {
+      color: $color-primary;
+    }
+  }
+
+  &.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  &.weekendDay {
+    .dayNumber {
+      color: $color-error;
+    }
+  }
+
+  &:active:not(.disabled):not(.selected) {
+    background-color: $color-bg-page;
+  }
+}
+
+.dayNumber {
+  font-size: $font-size-md;
+}
+
+.todayDot {
+  position: absolute;
+  bottom: 8rpx;
+  width: 8rpx;
+  height: 8rpx;
+  border-radius: 50%;
+  background-color: $color-primary;
+}

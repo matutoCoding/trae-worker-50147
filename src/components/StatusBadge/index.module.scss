@@ -1,0 +1,85 @@
+@use '@/styles/variables.scss' as *;
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: $radius-xs;
+  border: 1rpx solid transparent;
+  transition: all $transition-base;
+
+  &.sm {
+    padding: 4rpx 12rpx;
+    .statusText {
+      font-size: $font-size-xs;
+    }
+  }
+
+  &.md {
+    padding: 6rpx 16rpx;
+    .statusText {
+      font-size: $font-size-sm;
+    }
+  }
+
+  &.lg {
+    padding: 8rpx 20rpx;
+    .statusText {
+      font-size: $font-size-md;
+    }
+  }
+
+  &.success {
+    background-color: rgba($color-success, 0.1);
+    border-color: rgba($color-success, 0.25);
+    .statusText {
+      color: $color-success;
+    }
+  }
+
+  &.warning {
+    background-color: rgba($color-warning, 0.1);
+    border-color: rgba($color-warning, 0.25);
+    .statusText {
+      color: $color-warning;
+    }
+  }
+
+  &.error {
+    background-color: rgba($color-error, 0.1);
+    border-color: rgba($color-error, 0.25);
+    .statusText {
+      color: $color-error;
+    }
+  }
+
+  &.info {
+    background-color: rgba($color-booking-pending, 0.1);
+    border-color: rgba($color-booking-pending, 0.25);
+    .statusText {
+      color: $color-booking-pending;
+    }
+  }
+
+  &.purple {
+    background-color: rgba($color-booking-using, 0.1);
+    border-color: rgba($color-booking-using, 0.25);
+    .statusText {
+      color: $color-booking-using;
+    }
+  }
+
+  &.default {
+    background-color: rgba($color-text-tertiary, 0.1);
+    border-color: rgba($color-text-tertiary, 0.25);
+    .statusText {
+      color: $color-text-tertiary;
+    }
+  }
+}
+
+.statusText {
+  font-weight: $font-weight-medium;
+  line-height: 1.4;
+  white-space: nowrap;
+}

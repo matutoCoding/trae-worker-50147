@@ -1,0 +1,94 @@
+@use '@/styles/variables.scss' as *;
+
+.nodeContainer {
+  display: flex;
+  position: relative;
+  padding-left: 0;
+}
+
+.nodeContent {
+  flex: 1;
+  padding-bottom: $spacing-lg;
+}
+
+.nodeHeader {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  margin-bottom: $spacing-sm;
+}
+
+.nodeIndicator {
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all $transition-base;
+}
+
+.indicatorIcon {
+  font-size: $font-size-md;
+  color: $color-text-white;
+  font-weight: $font-weight-bold;
+}
+
+.nodeInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.nodeName {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.nodeStatus {
+  font-size: $font-size-sm;
+}
+
+.processedTime {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  flex-shrink: 0;
+}
+
+.approverRow,
+.commentRow {
+  display: flex;
+  align-items: flex-start;
+  margin-left: 64rpx;
+  margin-bottom: $spacing-xs;
+}
+
+.approverLabel,
+.commentLabel {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  flex-shrink: 0;
+}
+
+.approverName {
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+}
+
+.commentText {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  flex: 1;
+}
+
+.nodeConnector {
+  position: absolute;
+  left: 23rpx;
+  top: 48rpx;
+  width: 2rpx;
+  height: calc(100% - 48rpx);
+  transition: background-color $transition-base;
+}

@@ -1,0 +1,287 @@
+@use '@/styles/variables.scss' as *;
+
+.pageContainer {
+  min-height: 100vh;
+  background-color: $color-bg-page;
+  padding-bottom: 120rpx;
+}
+
+.roomImage {
+  width: 100%;
+  height: 400rpx;
+  display: block;
+}
+
+.content {
+  padding: 0 $page-padding;
+  margin-top: -$spacing-lg;
+  position: relative;
+  z-index: 2;
+}
+
+.infoCard {
+  background-color: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+  margin-bottom: $spacing-md;
+}
+
+.roomHeader {
+  margin-bottom: $spacing-lg;
+}
+
+.roomName {
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-sm;
+}
+
+.roomLocation {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-sm;
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+}
+
+.roomStatus {
+  display: inline-block;
+  padding: 6rpx 20rpx;
+  border-radius: $radius-sm;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+
+  &.available {
+    background-color: rgba($color-success, 0.1);
+    color: $color-success;
+  }
+
+  &.maintenance {
+    background-color: rgba($color-warning, 0.1);
+    color: $color-warning;
+  }
+
+  &.closed {
+    background-color: rgba($color-error, 0.1);
+    color: $color-error;
+  }
+}
+
+.roomStats {
+  display: flex;
+  gap: $spacing-lg;
+  padding: $spacing-md 0;
+  border-top: 1rpx solid $color-divider;
+  border-bottom: 1rpx solid $color-divider;
+}
+
+.statItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  gap: $spacing-xs;
+}
+
+.statValue {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  color: $color-primary;
+}
+
+.statLabel {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+}
+
+.roomDescription {
+  margin-top: $spacing-md;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  line-height: $line-height-normal;
+}
+
+.section {
+  background-color: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+  margin-bottom: $spacing-md;
+}
+
+.sectionTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-md;
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.sectionIcon {
+  font-size: $font-size-xl;
+}
+
+.equipmentGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: $spacing-md;
+}
+
+.equipmentItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $spacing-xs;
+  padding: $spacing-md 0;
+  background-color: $color-bg-page;
+  border-radius: $radius-md;
+}
+
+.equipmentIcon {
+  font-size: 40rpx;
+}
+
+.equipmentName {
+  font-size: $font-size-xs;
+  color: $color-text-primary;
+  text-align: center;
+}
+
+.facilityList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+}
+
+.facilityTag {
+  padding: $spacing-xs $spacing-md;
+  background-color: rgba($color-primary, 0.08);
+  border-radius: $radius-sm;
+  font-size: $font-size-sm;
+  color: $color-primary;
+}
+
+.timeInfo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-md;
+  background-color: $color-bg-page;
+  border-radius: $radius-md;
+}
+
+.timeLabel {
+  font-size: $font-size-md;
+  color: $color-text-secondary;
+}
+
+.timeValue {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.todaySchedule {
+  margin-top: $spacing-md;
+}
+
+.scheduleHeader {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-sm;
+}
+
+.scheduleTimeline {
+  display: flex;
+  gap: 4rpx;
+  overflow-x: auto;
+  padding-bottom: $spacing-sm;
+}
+
+.timeSlot {
+  flex-shrink: 0;
+  width: 80rpx;
+  padding: $spacing-sm 0;
+  text-align: center;
+  border-radius: $radius-sm;
+  font-size: $font-size-xs;
+
+  &.available {
+    background-color: rgba($color-success, 0.1);
+    color: $color-success;
+  }
+
+  &.occupied {
+    background-color: rgba($color-error, 0.1);
+    color: $color-error;
+  }
+}
+
+.slotTime {
+  font-weight: $font-weight-medium;
+}
+
+.bottomBar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: $color-bg-card;
+  padding: $spacing-md $page-padding;
+  padding-bottom: calc($spacing-md + env(safe-area-inset-bottom));
+  box-shadow: 0 -4rpx 16rpx rgba(0, 0, 0, 0.08);
+  display: flex;
+  gap: $spacing-md;
+  z-index: 100;
+}
+
+.btnSecondary {
+  flex: 1;
+  padding: $spacing-md;
+  border: 2rpx solid $color-primary;
+  border-radius: $radius-lg;
+  background-color: $color-bg-card;
+  color: $color-primary;
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  text-align: center;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.8;
+  }
+}
+
+.btnPrimary {
+  flex: 2;
+  padding: $spacing-md;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  border-radius: $radius-lg;
+  color: $color-text-white;
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  text-align: center;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+
+  &.disabled {
+    background: $color-text-tertiary;
+    opacity: 0.6;
+  }
+}
+
+.emptySchedule {
+  text-align: center;
+  padding: $spacing-lg 0;
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}

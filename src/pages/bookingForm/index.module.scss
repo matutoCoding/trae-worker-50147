@@ -1,0 +1,413 @@
+@use '@/styles/variables.scss' as *;
+
+.pageContainer {
+  min-height: 100vh;
+  background-color: $color-bg-page;
+  padding-bottom: 120rpx;
+}
+
+.content {
+  padding: $spacing-md $page-padding;
+}
+
+.formSection {
+  background-color: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-md;
+  box-shadow: $shadow-card;
+}
+
+.sectionTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-lg;
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.sectionIcon {
+  font-size: $font-size-xl;
+}
+
+.formItem {
+  margin-bottom: $spacing-lg;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.formLabel {
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+  margin-bottom: $spacing-sm;
+  display: flex;
+  align-items: center;
+}
+
+.required {
+  color: $color-error;
+  margin-right: 4rpx;
+}
+
+.formValue {
+  padding: $spacing-md;
+  background-color: $color-bg-page;
+  border-radius: $radius-md;
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.formPlaceholder {
+  color: $color-text-tertiary;
+}
+
+.formArrow {
+  color: $color-text-tertiary;
+  font-size: $font-size-xl;
+}
+
+.formInput {
+  width: 100%;
+  padding: $spacing-md;
+  background-color: $color-bg-page;
+  border-radius: $radius-md;
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  border: none;
+  outline: none;
+  box-sizing: border-box;
+
+  &::placeholder {
+    color: $color-text-tertiary;
+  }
+}
+
+.formTextarea {
+  width: 100%;
+  padding: $spacing-md;
+  background-color: $color-bg-page;
+  border-radius: $radius-md;
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  border: none;
+  outline: none;
+  box-sizing: border-box;
+  min-height: 160rpx;
+  resize: none;
+
+  &::placeholder {
+    color: $color-text-tertiary;
+  }
+}
+
+.timePicker {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+}
+
+.timeSlot {
+  flex: 1;
+  padding: $spacing-md;
+  background-color: $color-bg-page;
+  border-radius: $radius-md;
+  text-align: center;
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-sm;
+
+  &.disabled {
+    opacity: 0.5;
+  }
+}
+
+.timeIcon {
+  font-size: $font-size-xl;
+}
+
+.timeDivider {
+  font-size: $font-size-xl;
+  color: $color-text-secondary;
+}
+
+.counter {
+  display: flex;
+  align-items: center;
+  gap: $spacing-lg;
+}
+
+.counterBtn {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: $radius-md;
+  background-color: $color-bg-page;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: $font-size-xl;
+  color: $color-primary;
+  transition: all $transition-base;
+
+  &:active {
+    background-color: $color-bg-hover;
+  }
+
+  &.disabled {
+    opacity: 0.4;
+  }
+}
+
+.counterValue {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  color: $color-primary;
+  min-width: 80rpx;
+  text-align: center;
+}
+
+.tagList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+}
+
+.tagItem {
+  padding: $spacing-sm $spacing-md;
+  background-color: $color-bg-page;
+  border-radius: $radius-sm;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  border: 2rpx solid transparent;
+  transition: all $transition-base;
+
+  &.selected {
+    background-color: rgba($color-primary, 0.1);
+    color: $color-primary;
+    border-color: $color-primary;
+  }
+}
+
+.tagIcon {
+  margin-right: $spacing-xs;
+}
+
+.conflictAlert {
+  padding: $spacing-md;
+  background-color: rgba($color-error, 0.08);
+  border: 1rpx solid rgba($color-error, 0.2);
+  border-radius: $radius-md;
+  margin-bottom: $spacing-md;
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-sm;
+}
+
+.conflictIcon {
+  font-size: $font-size-lg;
+  flex-shrink: 0;
+}
+
+.conflictText {
+  font-size: $font-size-sm;
+  color: $color-error;
+  line-height: $line-height-normal;
+}
+
+.successAlert {
+  padding: $spacing-md;
+  background-color: rgba($color-success, 0.08);
+  border: 1rpx solid rgba($color-success, 0.2);
+  border-radius: $radius-md;
+  margin-bottom: $spacing-md;
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-sm;
+}
+
+.successIcon {
+  font-size: $font-size-lg;
+  flex-shrink: 0;
+}
+
+.successText {
+  font-size: $font-size-sm;
+  color: $color-success;
+  line-height: $line-height-normal;
+}
+
+.approvalFlow {
+  padding: $spacing-md;
+  background-color: $color-bg-page;
+  border-radius: $radius-md;
+}
+
+.approvalTitle {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-md;
+}
+
+.approvalSteps {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.approvalStep {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $spacing-xs;
+}
+
+.stepIcon {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: $radius-round;
+  background-color: rgba($color-primary, 0.15);
+  color: $color-primary;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+}
+
+.stepName {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+  text-align: center;
+}
+
+.stepLine {
+  width: 40rpx;
+  height: 4rpx;
+  background-color: $color-divider;
+  margin: 0 $spacing-xs;
+  margin-bottom: $spacing-lg;
+}
+
+.bottomBar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: $color-bg-card;
+  padding: $spacing-md $page-padding;
+  padding-bottom: calc($spacing-md + env(safe-area-inset-bottom));
+  box-shadow: 0 -4rpx 16rpx rgba(0, 0, 0, 0.08);
+  display: flex;
+  gap: $spacing-md;
+  z-index: 100;
+}
+
+.btnCancel {
+  flex: 1;
+  padding: $spacing-md;
+  border: 2rpx solid $color-border;
+  border-radius: $radius-lg;
+  background-color: $color-bg-card;
+  color: $color-text-secondary;
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  text-align: center;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.8;
+  }
+}
+
+.btnSubmit {
+  flex: 2;
+  padding: $spacing-md;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  border-radius: $radius-lg;
+  color: $color-text-white;
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  text-align: center;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+
+  &.disabled {
+    background: $color-text-tertiary;
+    opacity: 0.6;
+  }
+}
+
+.datePicker {
+  display: flex;
+  gap: $spacing-sm;
+  overflow-x: auto;
+  padding-bottom: $spacing-sm;
+}
+
+.dateItem {
+  flex-shrink: 0;
+  width: 100rpx;
+  padding: $spacing-md $spacing-sm;
+  background-color: $color-bg-page;
+  border-radius: $radius-md;
+  text-align: center;
+  transition: all $transition-base;
+
+  &.selected {
+    background-color: $color-primary;
+
+    .dateWeek,
+    .dateDay {
+      color: $color-text-white;
+    }
+  }
+}
+
+.dateWeek {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-xs;
+}
+
+.dateDay {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+}
+
+.weekdayList {
+  display: flex;
+  gap: $spacing-sm;
+  overflow-x: auto;
+  padding-bottom: $spacing-sm;
+}
+
+.weekdayItem {
+  flex-shrink: 0;
+  padding: $spacing-sm $spacing-md;
+  background-color: $color-bg-page;
+  border-radius: $radius-round;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  transition: all $transition-base;
+
+  &.selected {
+    background-color: $color-primary;
+    color: $color-text-white;
+  }
+}

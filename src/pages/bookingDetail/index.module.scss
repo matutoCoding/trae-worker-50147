@@ -1,0 +1,360 @@
+@use '@/styles/variables.scss' as *;
+
+.pageContainer {
+  min-height: 100vh;
+  background-color: $color-bg-page;
+  padding-bottom: 120rpx;
+}
+
+.content {
+  padding: $spacing-md $page-padding;
+}
+
+.headerCard {
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  border-radius: $radius-lg;
+  padding: $spacing-xl $spacing-lg;
+  margin-bottom: $spacing-md;
+  color: $color-text-white;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -60rpx;
+    right: -60rpx;
+    width: 200rpx;
+    height: 200rpx;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+  }
+}
+
+.bookingNo {
+  font-size: $font-size-sm;
+  opacity: 0.8;
+  margin-bottom: $spacing-sm;
+  position: relative;
+  z-index: 1;
+}
+
+.bookingStatus {
+  display: inline-block;
+  padding: 8rpx 24rpx;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: $radius-round;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  margin-bottom: $spacing-md;
+  position: relative;
+  z-index: 1;
+}
+
+.roomName {
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+  margin-bottom: $spacing-sm;
+  position: relative;
+  z-index: 1;
+}
+
+.bookingTime {
+  font-size: $font-size-md;
+  opacity: 0.9;
+  position: relative;
+  z-index: 1;
+}
+
+.infoCard {
+  background-color: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-md;
+  box-shadow: $shadow-card;
+}
+
+.sectionTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-lg;
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.sectionIcon {
+  font-size: $font-size-xl;
+}
+
+.infoList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.infoItem {
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-md;
+}
+
+.infoLabel {
+  flex-shrink: 0;
+  width: 140rpx;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+.infoValue {
+  flex: 1;
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  line-height: $line-height-normal;
+}
+
+.infoValueHighlight {
+  color: $color-primary;
+  font-weight: $font-weight-medium;
+}
+
+.tagList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+}
+
+.tagItem {
+  padding: 6rpx 20rpx;
+  background-color: rgba($color-primary, 0.08);
+  border-radius: $radius-sm;
+  font-size: $font-size-xs;
+  color: $color-primary;
+}
+
+.approvalSection {
+  background-color: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-md;
+  box-shadow: $shadow-card;
+}
+
+.approvalFlow {
+  position: relative;
+  padding-left: 40rpx;
+}
+
+.approvalNode {
+  position: relative;
+  padding-bottom: $spacing-lg;
+
+  &:last-child {
+    padding-bottom: 0;
+
+    .nodeLine {
+      display: none;
+    }
+  }
+}
+
+.nodeDot {
+  position: absolute;
+  left: -40rpx;
+  top: 0;
+  width: 24rpx;
+  height: 24rpx;
+  border-radius: $radius-round;
+  background-color: $color-border;
+  border: 4rpx solid $color-bg-card;
+  box-shadow: 0 0 0 2rpx $color-border;
+  z-index: 2;
+
+  &.approved {
+    background-color: $color-success;
+    box-shadow: 0 0 0 2rpx $color-success;
+  }
+
+  &.rejected {
+    background-color: $color-error;
+    box-shadow: 0 0 0 2rpx $color-error;
+  }
+
+  &.pending {
+    background-color: $color-warning;
+    box-shadow: 0 0 0 2rpx $color-warning;
+  }
+}
+
+.nodeLine {
+  position: absolute;
+  left: -30rpx;
+  top: 24rpx;
+  width: 4rpx;
+  height: calc(100% - 24rpx);
+  background-color: $color-divider;
+  z-index: 1;
+}
+
+.nodeContent {
+  background-color: $color-bg-page;
+  border-radius: $radius-md;
+  padding: $spacing-md;
+}
+
+.nodeHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-sm;
+}
+
+.nodeName {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.nodeStatus {
+  font-size: $font-size-xs;
+  padding: 4rpx 16rpx;
+  border-radius: $radius-sm;
+
+  &.approved {
+    background-color: rgba($color-success, 0.1);
+    color: $color-success;
+  }
+
+  &.rejected {
+    background-color: rgba($color-error, 0.1);
+    color: $color-error;
+  }
+
+  &.pending {
+    background-color: rgba($color-warning, 0.1);
+    color: $color-warning;
+  }
+
+  &.skipped {
+    background-color: rgba($color-text-tertiary, 0.1);
+    color: $color-text-tertiary;
+  }
+}
+
+.nodeInfo {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-xs;
+}
+
+.nodeComment {
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  background-color: $color-bg-card;
+  padding: $spacing-sm;
+  border-radius: $radius-sm;
+  margin-top: $spacing-sm;
+}
+
+.rejectSection {
+  background-color: rgba($color-error, 0.05);
+  border: 1rpx solid rgba($color-error, 0.2);
+  border-radius: $radius-md;
+  padding: $spacing-md;
+  margin-top: $spacing-md;
+}
+
+.rejectTitle {
+  font-size: $font-size-sm;
+  color: $color-error;
+  font-weight: $font-weight-semibold;
+  margin-bottom: $spacing-sm;
+}
+
+.rejectReason {
+  font-size: $font-size-sm;
+  color: $color-error;
+  line-height: $line-height-normal;
+}
+
+.bottomBar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: $color-bg-card;
+  padding: $spacing-md $page-padding;
+  padding-bottom: calc($spacing-md + env(safe-area-inset-bottom));
+  box-shadow: 0 -4rpx 16rpx rgba(0, 0, 0, 0.08);
+  display: flex;
+  gap: $spacing-md;
+  z-index: 100;
+}
+
+.btnSecondary {
+  flex: 1;
+  padding: $spacing-md;
+  border: 2rpx solid $color-border;
+  border-radius: $radius-lg;
+  background-color: $color-bg-card;
+  color: $color-text-secondary;
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  text-align: center;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.8;
+  }
+
+  &.danger {
+    border-color: $color-error;
+    color: $color-error;
+  }
+}
+
+.btnPrimary {
+  flex: 1;
+  padding: $spacing-md;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  border-radius: $radius-lg;
+  color: $color-text-white;
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  text-align: center;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+
+  &.success {
+    background: linear-gradient(135deg, $color-success 0%, #73D13D 100%);
+  }
+
+  &.disabled {
+    background: $color-text-tertiary;
+    opacity: 0.6;
+  }
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-xl 0;
+  gap: $spacing-md;
+}
+
+.emptyIcon {
+  font-size: 80rpx;
+  opacity: 0.5;
+}
+
+.emptyText {
+  font-size: $font-size-md;
+  color: $color-text-tertiary;
+}

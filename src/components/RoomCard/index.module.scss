@@ -1,0 +1,109 @@
+@use '@/styles/variables.scss' as *;
+
+.roomCard {
+  display: flex;
+  background-color: $color-bg-card;
+  border-radius: $radius-lg;
+  overflow: hidden;
+  box-shadow: $shadow-card;
+  margin-bottom: $spacing-md;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.98);
+    box-shadow: $shadow-card-hover;
+  }
+}
+
+.roomImage {
+  width: 220rpx;
+  height: 220rpx;
+  flex-shrink: 0;
+}
+
+.roomInfo {
+  flex: 1;
+  padding: $spacing-md;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.roomHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-sm;
+}
+
+.roomName {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  @include text-ellipsis;
+  flex: 1;
+  margin-right: $spacing-sm;
+}
+
+.roomLocation {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-sm;
+}
+
+.roomMeta {
+  display: flex;
+  gap: $spacing-lg;
+  margin-bottom: $spacing-sm;
+}
+
+.metaItem {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+}
+
+.metaIcon {
+  font-size: $font-size-md;
+}
+
+.metaText {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
+.equipmentList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+}
+
+.equipmentTag {
+  display: flex;
+  align-items: center;
+  gap: 4rpx;
+  padding: 4rpx 12rpx;
+  background-color: $color-bg-page;
+  border-radius: $radius-sm;
+}
+
+.eqIcon {
+  font-size: $font-size-sm;
+}
+
+.eqName {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+}
+
+.moreTag {
+  padding: 4rpx 12rpx;
+  background-color: $color-bg-page;
+  border-radius: $radius-sm;
+}
+
+.moreText {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
