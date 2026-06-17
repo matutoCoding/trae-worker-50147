@@ -34,9 +34,9 @@ const RoomDetailPage: React.FC = () => {
 
   const todaySchedule = useMemo(() => {
     if (!room) return [];
-    const bookings = getRoomBookings(room.id, today);
-    return getAvailableTimeSlots(room.openTime, room.closeTime, bookings, 60);
-  }, [room, today, getRoomBookings]);
+    const allBookings = useBookingStore.getState().bookings;
+    return getAvailableTimeSlots(today, room.id, allBookings, room.openTime, room.closeTime, 60);
+  }, [room, today]);
 
   const handleBack = () => {
     console.log('[RoomDetailPage] Back clicked');

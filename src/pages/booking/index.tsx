@@ -7,7 +7,8 @@ import TimeSlot from '@/components/TimeSlot';
 import RoomCard from '@/components/RoomCard';
 import { useRoomStore } from '@/store/useRoomStore';
 import { useBookingStore } from '@/store/useBookingStore';
-import { getToday, getAvailableTimeSlots } from '@/utils/conflict';
+import { getToday, timeToMinutes } from '@/utils/date';
+import { getAvailableTimeSlots } from '@/utils/conflict';
 import type { Room } from '@/types/room';
 
 const filterOptions = [
@@ -132,11 +133,26 @@ const BookingPage: React.FC = () => {
       const exists = prev.find((s) => s.startTime === slot.startTime);
       if (exists) {
         return prev.filter((s) => s.startTime !== slot.startTime);
-      } else {
-        return [...prev, { startTime: slot.startTime, endTime: slot.endTime }].sort((a, b) =>
-          a.startTime.localeCompare(b.startTime)
-        );
       }
+
+      const newSlots = [...prev, { startTime: slot.startTime, endTime: slot.endTime }].sort((a, b) =>
+        a.startTime.localeCompare(b.startTime)
+      );
+
+      if (newSlots.length <= 1) {
+        return newSlots;
+      }
+
+      for (let i = 1; i < newSlots.length; i++) {
+        const prevEnd = timeToMinutes(newSlots[i - 1].endTime);
+        const currStart = timeToMinutes(newSlots[i].startTime);
+        if (currStart > prevEnd) {
+          Taro.showToast({ title: '请选择连续时段', icon: 'none' });
+          return prev;
+        }
+      }
+
+      return newSlots;
     });
   };
 
@@ -150,6 +166,15 @@ const BookingPage: React.FC = () => {
     if (!selectedRoom || selectedSlots.length === 0) {
       Taro.showToast({ title: '请选择时段', icon: 'none' });
       return;
+    }
+
+    for (let i = 1; i < selectedSlots.length; i++) {
+      const prevEnd = timeToMinutes(selectedSlots[i - 1].endTime);
+      const currStart = timeToMinutes(selectedSlots[i].startTime);
+      if (currStart > prevEnd) {
+        Taro.showToast({ title: '时段不连续，请重新选择', icon: 'none' });
+        return;
+      }
     }
 
     const mergedStartTime = selectedSlots[0].startTime;

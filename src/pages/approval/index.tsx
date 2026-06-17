@@ -14,8 +14,8 @@ import classnames from 'classnames';
 const ApprovalPage: React.FC = () => {
   const currentUser = useUserStore((state) => state.currentUser);
   const bookings = useBookingStore((state) => state.bookings);
-  const approve = useApprovalStore((state) => state.approve);
-  const reject = useApprovalStore((state) => state.reject);
+  const approveBooking = useApprovalStore((state) => state.approveBooking);
+  const rejectBooking = useApprovalStore((state) => state.rejectBooking);
   const [activeTab, setActiveTab] = useState<'pending' | 'history'>('pending');
   const [refreshing, setRefreshing] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
@@ -65,13 +65,14 @@ const ApprovalPage: React.FC = () => {
       title: '确认通过',
       content: '确定要通过该预约申请吗？',
       success: (res) => {
-        if (res.confirm && booking.approvalRecord) {
+        if (res.confirm) {
           try {
-            approve(booking.approvalRecord.id, currentUser, '同意申请');
-            Taro.showToast({ title: '审批通过', icon: 'success' });
-          } catch (error) {
+            const result = approveBooking(booking.id, currentUser, '同意申请');
+            const toastMsg = result?.newStatus === 'approved' ? '审批通过，预约成功！' : '审批通过，已流转至下一节点';
+            Taro.showToast({ title: toastMsg, icon: 'success' });
+          } catch (error: any) {
             console.error('[ApprovalPage] Approve error:', error);
-            Taro.showToast({ title: '操作失败', icon: 'none' });
+            Taro.showToast({ title: error.message || '操作失败', icon: 'none' });
           }
         }
       }
@@ -91,16 +92,16 @@ const ApprovalPage: React.FC = () => {
       return;
     }
 
-    if (selectedBooking?.approvalRecord) {
+    if (selectedBooking) {
       try {
-        reject(selectedBooking.approvalRecord.id, currentUser, rejectReason.trim());
+        rejectBooking(selectedBooking.id, currentUser, rejectReason.trim());
         Taro.showToast({ title: '已驳回', icon: 'success' });
         setShowRejectModal(false);
         setSelectedBooking(null);
         setRejectReason('');
-      } catch (error) {
+      } catch (error: any) {
         console.error('[ApprovalPage] Reject error:', error);
-        Taro.showToast({ title: '操作失败', icon: 'none' });
+        Taro.showToast({ title: error.message || '操作失败', icon: 'none' });
       }
     }
   };

@@ -14,6 +14,8 @@ const BookingFormPage: React.FC = () => {
   const router = useRouter();
   const roomId = router.params.roomId as string;
   const initialDate = router.params.date as string;
+  const initialStartTime = router.params.startTime as string;
+  const initialEndTime = router.params.endTime as string;
 
   const getRoomById = useRoomStore((state) => state.getRoomById);
   const addBooking = useBookingStore((state) => state.addBooking);
@@ -22,13 +24,16 @@ const BookingFormPage: React.FC = () => {
 
   const room = useMemo(() => getRoomById(roomId), [roomId, getRoomById]);
 
-  const dateList = useMemo(() => getDateList(7), []);
+  const dateList = useMemo(() => getDateList(getToday(), 7), []);
+
+  const defaultStartTime = initialStartTime || '09:00';
+  const defaultEndTime = initialEndTime || '10:00';
 
   const [formData, setFormData] = useState<BookingFormData>({
     roomId: roomId || '',
     date: initialDate || dateList[0],
-    startTime: '09:00',
-    endTime: '10:00',
+    startTime: defaultStartTime,
+    endTime: defaultEndTime,
     purpose: '',
     participantCount: 2,
     participants: [],

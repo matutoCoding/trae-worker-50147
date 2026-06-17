@@ -101,41 +101,28 @@ const ApprovalDetailPage: React.FC = () => {
     console.log('[ApprovalDetailPage] Confirm action:', { modalType, comment });
 
     try {
+      let result = null;
+      let toastMsg = '';
+
       if (modalType === 'approve') {
-        const result = approveBooking(booking.id, currentUser, comment || '同意');
-        if (result) {
-          updateBookingApproval(booking.id, {
-            approvalRecord: result.approvalRecord,
-            status: result.newStatus || booking.status
-          });
-          Taro.showToast({ title: '审批通过', icon: 'success' });
-        }
+        result = approveBooking(booking.id, currentUser, comment || '同意');
+        toastMsg = result?.newStatus === 'approved' ? '审批通过，预约成功！' : '审批通过，已流转至下一节点';
       } else if (modalType === 'reject') {
-        const result = rejectBooking(booking.id, currentUser, comment);
-        if (result) {
-          updateBookingApproval(booking.id, {
-            approvalRecord: result.approvalRecord,
-            status: result.newStatus,
-            rejectedReason: comment,
-            rejectedBy: currentUser.name
-          });
-          Taro.showToast({ title: '已驳回', icon: 'success' });
-        }
+        result = rejectBooking(booking.id, currentUser, comment);
+        toastMsg = '已驳回，申请人可查看驳回原因';
       } else if (modalType === 'rollback') {
-        const result = rollbackBooking(booking.id, comment);
-        if (result) {
-          updateBookingApproval(booking.id, {
-            approvalRecord: result.approvalRecord,
-            status: result.newStatus
-          });
-          Taro.showToast({ title: '已回退至上一步', icon: 'success' });
-        }
+        result = rollbackBooking(booking.id, comment);
+        toastMsg = '已回退至上一审批节点';
+      }
+
+      if (result) {
+        Taro.showToast({ title: toastMsg, icon: 'success', duration: 2000 });
       }
 
       setModalType(null);
       setTimeout(() => {
         loadBooking();
-      }, 500);
+      }, 800);
     } catch (error: any) {
       console.error('[ApprovalDetailPage] Action failed:', error);
       Taro.showToast({ title: error.message || '操作失败', icon: 'none' });
