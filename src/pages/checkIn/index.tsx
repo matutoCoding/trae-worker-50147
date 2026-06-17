@@ -5,7 +5,7 @@ import styles from './index.module.scss';
 import StatusBadge from '@/components/StatusBadge';
 import { useBookingStore } from '@/store/useBookingStore';
 import { useUserStore } from '@/store/useUserStore';
-import { formatDate, formatDateTime } from '@/utils/date';
+import { formatDate, formatDateTime, isCheckInTimeReached } from '@/utils/date';
 import { mockEquipmentOptions } from '@/data/rooms';
 import type { Booking } from '@/types/booking';
 import type { BorrowRecord } from '@/types/user';
@@ -69,12 +69,21 @@ const CheckInPage: React.FC = () => {
   }, [borrowedEquipmentIds]);
 
   const canCheckIn = booking?.status === 'approved' && booking.userId === currentUser.id;
+  const canCheckInTime = booking ? isCheckInTimeReached(booking.date, booking.startTime, 15) : false;
   const canCheckOut = booking?.status === 'checked_in' && booking.userId === currentUser.id;
   const canBorrow = booking?.status === 'checked_in' && booking.userId === currentUser.id;
   const hasBorrowedItems = myBorrowRecords.some((r) => r.status === 'borrowed');
 
   const handleCheckIn = () => {
     if (!booking) return;
+    if (!canCheckInTime) {
+      Taro.showToast({
+        title: `未到签到时间，${booking.startTime} 前可签到`,
+        icon: 'none',
+        duration: 2500
+      });
+      return;
+    }
     console.log('[CheckInPage] Check in:', booking.bookingNo);
     Taro.showModal({
       title: '确认签到',
@@ -93,8 +102,15 @@ const CheckInPage: React.FC = () => {
 
   const handleCheckOut = () => {
     if (!booking) return;
-    if (hasBorrowedItems) {
-      Taro.showToast({ title: '请先归还所有设备', icon: 'none' });
+    const unreturnedInBooking = booking.equipmentUsage?.filter((e) => e.borrowed && !e.returned) || [];
+    const unreturnedInUserStore = myBorrowRecords.filter((r) => r.status === 'borrowed');
+    const totalUnreturned = unreturnedInBooking.length + unreturnedInUserStore.length;
+    if (totalUnreturned > 0) {
+      Taro.showToast({
+        title: `还有${totalUnreturned}件设备未归还，请先归还`,
+        icon: 'none',
+        duration: 2500
+      });
       return;
     }
     console.log('[CheckInPage] Check out:', booking.bookingNo);
@@ -329,17 +345,20 @@ const CheckInPage: React.FC = () => {
             <Text>返回</Text>
           </View>
           {canCheckIn && (
-            <View className={styles.btnPrimary} onClick={handleCheckIn}>
-              <Text>立即签到</Text>
+            <View
+              className={`${styles.btnPrimary} ${!canCheckInTime ? styles.disabled : ''}`}
+              onClick={handleCheckIn}
+            >
+              <Text>{canCheckInTime ? '立即签到' : '未到签到时间'}</Text>
             </View>
           )}
           {canCheckOut && (
             <View
-              className={`${styles.btnPrimary} ${styles.success} ${hasBorrowedItems ? styles.disabled : ''}`}
+              className={`${styles.btnPrimary} ${styles.success} ${hasBorrowedItems || (booking?.equipmentUsage?.some(e => e.borrowed && !e.returned)) ? styles.disabled : ''}`}
               onClick={handleCheckOut}
             >
               <Text>
-                {hasBorrowedItems ? '请先归还设备' : '确认签退'}
+                {(hasBorrowedItems || (booking?.equipmentUsage?.some(e => e.borrowed && !e.returned))) ? '请先归还设备' : '确认签退'}
               </Text>
             </View>
           )}

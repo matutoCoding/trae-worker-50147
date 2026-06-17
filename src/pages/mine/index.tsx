@@ -5,8 +5,8 @@ import styles from './index.module.scss';
 import StatusBadge from '@/components/StatusBadge';
 import { useUserStore } from '@/store/useUserStore';
 import { useBookingStore } from '@/store/useBookingStore';
-import { formatDate, timeToMinutes } from '@/utils/date';
-import type { Booking, BookingStatus } from '@/types/booking';
+import { formatDate, isCheckInTimeReached } from '@/utils/date';
+import type { Booking } from '@/types/booking';
 
 const roleMap = {
   student: '学生',
@@ -26,24 +26,19 @@ const tabFilters: { label: string; key: TabFilterKey }[] = [
   { label: '已驳回', key: 'rejected' }
 ];
 
-const isCheckInTimeReached = (booking: Booking): boolean => {
-  const now = new Date();
-  const todayStr = formatDate(now, 'YYYY-MM-DD');
-  if (booking.date < todayStr) return true;
-  if (booking.date > todayStr) return false;
-  const nowMinutes = now.getHours() * 60 + now.getMinutes();
-  const startMinutes = timeToMinutes(booking.startTime);
-  return nowMinutes >= startMinutes - 15;
-};
-
 const MinePage: React.FC = () => {
   const currentUser = useUserStore((state) => state.currentUser);
-  const borrowRecords = useUserStore((state) => state.getUserBorrowRecords(currentUser.id));
+  const allBorrowRecords = useUserStore((state) => state.borrowRecords);
+  const getUserBorrowRecords = useUserStore((state) => state.getUserBorrowRecords);
   const getUserBookings = useBookingStore((state) => state.getUserBookings);
   const checkIn = useBookingStore((state) => state.checkIn);
   const checkOut = useBookingStore((state) => state.checkOut);
   const [activeTab, setActiveTab] = useState<TabFilterKey>('all');
   const [refreshing, setRefreshing] = useState(false);
+
+  const borrowRecords = useMemo(() => {
+    return getUserBorrowRecords(currentUser.id);
+  }, [getUserBorrowRecords, currentUser.id]);
 
   const myBookings = useMemo(() => {
     return getUserBookings(currentUser.id);
@@ -98,7 +93,7 @@ const MinePage: React.FC = () => {
 
   const handleCheckIn = (booking: Booking, e: any) => {
     e.stopPropagation();
-    if (!isCheckInTimeReached(booking)) {
+    if (!isCheckInTimeReached(booking.date, booking.startTime, 15)) {
       Taro.showToast({
         title: `未到签到时间，${booking.startTime} 前可签到`,
         icon: 'none',
@@ -120,10 +115,14 @@ const MinePage: React.FC = () => {
 
   const handleCheckOut = (booking: Booking, e: any) => {
     e.stopPropagation();
-    const unreturnedItems = booking.equipmentUsage?.filter((eq) => eq.borrowed && !eq.returned);
-    if (unreturnedItems && unreturnedItems.length > 0) {
+    const unreturnedInBooking = booking.equipmentUsage?.filter((eq) => eq.borrowed && !eq.returned) || [];
+    const unreturnedInUserStore = allBorrowRecords.filter(
+      (r) => r.bookingId === booking.id && r.borrowerId === currentUser.id && r.status === 'borrowed'
+    );
+    const totalUnreturned = unreturnedInBooking.length + unreturnedInUserStore.length;
+    if (totalUnreturned > 0) {
       Taro.showToast({
-        title: `还有${unreturnedItems.length}件设备未归还，请先归还`,
+        title: `还有${totalUnreturned}件设备未归还，请先归还`,
         icon: 'none',
         duration: 2500
       });
@@ -189,7 +188,7 @@ const MinePage: React.FC = () => {
     const canCheckIn = booking.status === 'approved';
     const canCheckOut = booking.status === 'checked_in';
     const canCancel = ['pending_leader', 'pending_counselor', 'pending_admin', 'approved'].includes(booking.status);
-    const checkInReached = canCheckIn && isCheckInTimeReached(booking);
+    const checkInReached = canCheckIn && isCheckInTimeReached(booking.date, booking.startTime, 15);
 
     return (
       <View className={styles.actionRow}>

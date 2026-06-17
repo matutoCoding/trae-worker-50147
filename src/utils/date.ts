@@ -84,3 +84,13 @@ export const formatDuration = (minutes: number): string => {
     return `${mins}分钟`;
   }
 };
+
+export const isCheckInTimeReached = (date: string, startTime: string, aheadMinutes: number = 15): boolean => {
+  const now = new Date();
+  const todayStr = formatDate(now, 'YYYY-MM-DD');
+  if (date < todayStr) return true;
+  if (date > todayStr) return false;
+  const nowMinutes = now.getHours() * 60 + now.getMinutes();
+  const startMinutes = timeToMinutes(startTime);
+  return nowMinutes >= startMinutes - aheadMinutes;
+};

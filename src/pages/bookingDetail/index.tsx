@@ -5,20 +5,10 @@ import styles from './index.module.scss';
 import StatusBadge from '@/components/StatusBadge';
 import { useBookingStore } from '@/store/useBookingStore';
 import { useUserStore } from '@/store/useUserStore';
-import { formatDate, formatDateTime, timeToMinutes } from '@/utils/date';
+import { formatDate, formatDateTime, isCheckInTimeReached as checkTimeReached } from '@/utils/date';
 import { BOOKING_STATUS_MAP } from '@/types/booking';
 import type { Booking, EquipmentUsageItem } from '@/types/booking';
 import { mockEquipmentOptions } from '@/data/rooms';
-
-const isCheckInTimeReached = (booking: Booking): boolean => {
-  const now = new Date();
-  const todayStr = formatDate(now, 'YYYY-MM-DD');
-  if (booking.date < todayStr) return true;
-  if (booking.date > todayStr) return false;
-  const nowMinutes = now.getHours() * 60 + now.getMinutes();
-  const startMinutes = timeToMinutes(booking.startTime);
-  return nowMinutes >= startMinutes - 15;
-};
 
 const BookingDetailPage: React.FC = () => {
   const router = useRouter();
@@ -30,6 +20,7 @@ const BookingDetailPage: React.FC = () => {
   const updateActualAttendance = useBookingStore((state) => state.updateActualAttendance);
   const updateEquipmentUsage = useBookingStore((state) => state.updateEquipmentUsage);
   const currentUser = useUserStore((state) => state.currentUser);
+  const borrowRecords = useUserStore((state) => state.borrowRecords);
   const [booking, setBooking] = useState<Booking | undefined>(undefined);
   const [refreshing, setRefreshing] = useState(false);
   const [cancelReason, setCancelReason] = useState('');
@@ -80,7 +71,7 @@ const BookingDetailPage: React.FC = () => {
 
   const handleCheckIn = () => {
     if (!booking) return;
-    if (!isCheckInTimeReached(booking)) {
+    if (!checkTimeReached(booking.date, booking.startTime, 15)) {
       Taro.showToast({
         title: `未到签到时间，${booking.startTime} 前可签到`,
         icon: 'none',
@@ -103,9 +94,17 @@ const BookingDetailPage: React.FC = () => {
 
   const handleCheckOut = () => {
     if (!booking) return;
-    const unreturnedItems = booking.equipmentUsage?.filter((e) => e.borrowed && !e.returned);
-    if (unreturnedItems && unreturnedItems.length > 0) {
-      Taro.showToast({ title: '请先归还所有借用设备', icon: 'none' });
+    const unreturnedInBooking = booking.equipmentUsage?.filter((e) => e.borrowed && !e.returned) || [];
+    const unreturnedInUserStore = borrowRecords.filter(
+      (r) => r.bookingId === booking.id && r.borrowerId === currentUser.id && r.status === 'borrowed'
+    );
+    const totalUnreturned = unreturnedInBooking.length + unreturnedInUserStore.length;
+    if (totalUnreturned > 0) {
+      Taro.showToast({
+        title: `还有${totalUnreturned}件设备未归还，请先归还`,
+        icon: 'none',
+        duration: 2500
+      });
       return;
     }
     Taro.showModal({
@@ -237,7 +236,7 @@ const BookingDetailPage: React.FC = () => {
   const canCheckOut = isOwner && booking.status === 'checked_in';
   const canEdit = booking.status === 'rejected' && isOwner;
   const canManageUsage = isOwner && (booking.status === 'checked_in' || booking.status === 'completed');
-  const checkInTimeReached = canCheckIn && isCheckInTimeReached(booking);
+  const checkInTimeReached = canCheckIn && checkTimeReached(booking.date, booking.startTime, 15);
   const showActions = canCancel || canCheckIn || canCheckOut || canEdit;
 
   const equipmentUsageList = booking.equipmentUsage && booking.equipmentUsage.length > 0

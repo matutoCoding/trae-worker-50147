@@ -23,7 +23,6 @@ interface BookingState {
   getBookingsByStatus: (status: BookingStatus) => Booking[];
   getBookingsByDate: (date: string) => Booking[];
   checkConflict: (roomId: string, date: string, startTime: string, endTime: string, excludeId?: string) => boolean;
-  checkTimeValid: (roomId: string, startTime: string, endTime: string) => { valid: boolean; message: string };
   updateBookingApproval: (id: string, updates: Partial<Booking>) => void;
   checkIn: (id: string) => void;
   checkOut: (id: string) => void;
@@ -221,13 +220,6 @@ export const useBookingStore = create<BookingState>((set, get) => ({
   checkConflict: (roomId, date, startTime, endTime, excludeId) => {
     const conflict = checkBookingConflict(roomId, date, startTime, endTime, get().bookings, excludeId);
     return conflict.hasConflict;
-  },
-
-  checkTimeValid: (roomId, startTime, endTime) => {
-    const room = get().rooms.find((b) => b.roomId === roomId)?.room;
-    const openTime = room?.openTime || '08:00';
-    const closeTime = room?.closeTime || '22:00';
-    return checkTimeRangeValid(startTime, endTime, openTime, closeTime);
   },
 
   checkIn: (id) => {
