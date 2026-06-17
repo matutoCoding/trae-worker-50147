@@ -173,12 +173,34 @@
   color: $color-text-secondary;
   background-color: $color-bg-card;
   transition: all $transition-base;
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
 
   &.active {
     background-color: $color-primary;
     color: $color-text-white;
     font-weight: $font-weight-medium;
+
+    .tabCount {
+      background-color: rgba(255, 255, 255, 0.25);
+      color: $color-text-white;
+    }
   }
+}
+
+.tabCount {
+  min-width: 36rpx;
+  height: 36rpx;
+  padding: 0 10rpx;
+  border-radius: $radius-round;
+  background-color: rgba($color-text-secondary, 0.1);
+  color: $color-text-secondary;
+  font-size: 22rpx;
+  font-weight: $font-weight-medium;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .bookingList {
@@ -376,4 +398,51 @@
 .emptyText {
   font-size: $font-size-md;
   color: $color-text-tertiary;
+}
+
+.actionRow {
+  display: flex;
+  gap: $spacing-sm;
+  margin-top: $spacing-md;
+  padding-top: $spacing-md;
+  border-top: 1rpx solid $color-divider;
+}
+
+.actionBtnPrimary {
+  padding: $spacing-xs $spacing-lg;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  border-radius: $radius-md;
+  color: $color-text-white;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+
+  &:active {
+    opacity: 0.85;
+  }
+}
+
+.actionBtnSuccess {
+  padding: $spacing-xs $spacing-lg;
+  background: linear-gradient(135deg, $color-success 0%, #73D13D 100%);
+  border-radius: $radius-md;
+  color: $color-text-white;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+
+  &:active {
+    opacity: 0.85;
+  }
+}
+
+.actionBtnSecondary {
+  padding: $spacing-xs $spacing-lg;
+  border: 2rpx solid $color-border;
+  border-radius: $radius-md;
+  color: $color-text-secondary;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+
+  &:active {
+    background-color: $color-bg-hover;
+  }
 }

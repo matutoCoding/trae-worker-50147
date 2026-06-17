@@ -15,19 +15,25 @@ const roleMap = {
   admin: '管理员'
 };
 
-const tabFilters: { label: string; status: BookingStatus | 'all' }[] = [
-  { label: '全部', status: 'all' },
-  { label: '待审批', status: 'pending_leader' },
-  { label: '已通过', status: 'approved' },
-  { label: '使用中', status: 'checked_in' },
-  { label: '已完成', status: 'completed' }
+type TabFilterKey = 'all' | 'pending' | 'approved' | 'checked_in' | 'completed' | 'rejected';
+
+const tabFilters: { label: string; key: TabFilterKey }[] = [
+  { label: '全部', key: 'all' },
+  { label: '待审批', key: 'pending' },
+  { label: '已通过', key: 'approved' },
+  { label: '使用中', key: 'checked_in' },
+  { label: '已完成', key: 'completed' },
+  { label: '已驳回', key: 'rejected' }
 ];
 
 const MinePage: React.FC = () => {
   const currentUser = useUserStore((state) => state.currentUser);
   const borrowRecords = useUserStore((state) => state.getUserBorrowRecords(currentUser.id));
   const getUserBookings = useBookingStore((state) => state.getUserBookings);
-  const [activeTab, setActiveTab] = useState<BookingStatus | 'all'>('all');
+  const checkIn = useBookingStore((state) => state.checkIn);
+  const checkOut = useBookingStore((state) => state.checkOut);
+  const cancelBooking = useBookingStore((state) => state.cancelBooking);
+  const [activeTab, setActiveTab] = useState<TabFilterKey>('all');
   const [refreshing, setRefreshing] = useState(false);
 
   const myBookings = useMemo(() => {
@@ -41,14 +47,28 @@ const MinePage: React.FC = () => {
     ).length;
     const approved = myBookings.filter((b) => b.status === 'approved').length;
     const completed = myBookings.filter((b) => b.status === 'completed').length;
-    return { total, pending, approved, completed };
+    const rejected = myBookings.filter((b) => b.status === 'rejected').length;
+    return { total, pending, approved, completed, rejected };
   }, [myBookings]);
 
   const filteredBookings = useMemo(() => {
-    if (activeTab === 'all') {
-      return myBookings.slice(0, 3);
+    switch (activeTab) {
+      case 'pending':
+        return myBookings.filter((b) =>
+          b.status === 'pending_leader' || b.status === 'pending_counselor' || b.status === 'pending_admin'
+        );
+      case 'approved':
+        return myBookings.filter((b) => b.status === 'approved');
+      case 'checked_in':
+        return myBookings.filter((b) => b.status === 'checked_in');
+      case 'completed':
+        return myBookings.filter((b) => b.status === 'completed');
+      case 'rejected':
+        return myBookings.filter((b) => b.status === 'rejected');
+      case 'all':
+      default:
+        return myBookings;
     }
-    return myBookings.filter((b) => b.status === activeTab).slice(0, 3);
   }, [myBookings, activeTab]);
 
   usePullDownRefresh(() => {
@@ -66,6 +86,39 @@ const MinePage: React.FC = () => {
 
   const handleBookingClick = (booking: Booking) => {
     console.log('[MinePage] Booking clicked:', booking.bookingNo);
+    Taro.navigateTo({ url: `/pages/bookingDetail/index?id=${booking.id}` });
+  };
+
+  const handleCheckIn = (booking: Booking, e: any) => {
+    e.stopPropagation();
+    Taro.showModal({
+      title: '确认签到',
+      content: `确认签到使用「${booking.room.name}」？`,
+      success: (res) => {
+        if (res.confirm) {
+          checkIn(booking.id);
+          Taro.showToast({ title: '签到成功', icon: 'success' });
+        }
+      }
+    });
+  };
+
+  const handleCheckOut = (booking: Booking, e: any) => {
+    e.stopPropagation();
+    Taro.showModal({
+      title: '确认签退',
+      content: '确认使用完毕并签退？',
+      success: (res) => {
+        if (res.confirm) {
+          checkOut(booking.id);
+          Taro.showToast({ title: '签退成功', icon: 'success' });
+        }
+      }
+    });
+  };
+
+  const handleCancel = (booking: Booking, e: any) => {
+    e.stopPropagation();
     Taro.navigateTo({ url: `/pages/bookingDetail/index?id=${booking.id}` });
   };
 
@@ -93,6 +146,45 @@ const MinePage: React.FC = () => {
         Taro.showToast({ title: '关于我们 v1.0.0', icon: 'none' });
         break;
     }
+  };
+
+  const renderActionBtn = (booking: Booking) => {
+    const isOwner = booking.userId === currentUser.id;
+    if (!isOwner) return null;
+
+    const canCheckIn = booking.status === 'approved';
+    const canCheckOut = booking.status === 'checked_in';
+    const canCancel = ['pending_leader', 'pending_counselor', 'pending_admin', 'approved'].includes(booking.status);
+
+    return (
+      <View className={styles.actionRow}>
+        {canCheckIn && (
+          <View className={styles.actionBtnPrimary} onClick={(e) => handleCheckIn(booking, e)}>
+            <Text>签到</Text>
+          </View>
+        )}
+        {canCheckOut && (
+          <View className={styles.actionBtnSuccess} onClick={(e) => handleCheckOut(booking, e)}>
+            <Text>签退</Text>
+          </View>
+        )}
+        {canCancel && (
+          <View className={styles.actionBtnSecondary} onClick={(e) => handleCancel(booking, e)}>
+            <Text>详情</Text>
+          </View>
+        )}
+        {booking.status === 'rejected' && (
+          <View className={styles.actionBtnSecondary} onClick={(e) => handleCancel(booking, e)}>
+            <Text>重新编辑</Text>
+          </View>
+        )}
+        {booking.status === 'completed' && (
+          <View className={styles.actionBtnSecondary} onClick={(e) => handleCancel(booking, e)}>
+            <Text>查看详情</Text>
+          </View>
+        )}
+      </View>
+    );
   };
 
   return (
@@ -145,11 +237,20 @@ const MinePage: React.FC = () => {
           <ScrollView className={styles.tabList} scrollX>
             {tabFilters.map((tab) => (
               <View
-                key={tab.status}
-                className={`${styles.tabItem} ${activeTab === tab.status ? styles.active : ''}`}
-                onClick={() => setActiveTab(tab.status)}
+                key={tab.key}
+                className={`${styles.tabItem} ${activeTab === tab.key ? styles.active : ''}`}
+                onClick={() => setActiveTab(tab.key)}
               >
                 <Text>{tab.label}</Text>
+                {tab.key !== 'all' && (
+                  <Text className={styles.tabCount}>
+                    {tab.key === 'pending' ? stats.pending :
+                     tab.key === 'approved' ? stats.approved :
+                     tab.key === 'checked_in' ? myBookings.filter(b => b.status === 'checked_in').length :
+                     tab.key === 'completed' ? stats.completed :
+                     tab.key === 'rejected' ? stats.rejected : 0}
+                  </Text>
+                )}
               </View>
             ))}
           </ScrollView>
@@ -175,6 +276,7 @@ const MinePage: React.FC = () => {
                     <Text>{booking.purpose}</Text>
                   </View>
                 </View>
+                {renderActionBtn(booking)}
               </View>
             ))}
           </View>

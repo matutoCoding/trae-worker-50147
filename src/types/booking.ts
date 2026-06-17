@@ -25,6 +25,15 @@ export interface BookingFormData {
   remarks?: string;
 }
 
+export interface EquipmentUsageItem {
+  equipmentId: string;
+  equipmentName: string;
+  borrowed: boolean;
+  returned: boolean;
+  borrowTime?: string;
+  returnTime?: string;
+}
+
 export interface Booking {
   id: string;
   bookingNo: string;
@@ -44,6 +53,8 @@ export interface Booking {
   approvalRecord?: ApprovalRecord;
   checkInTime?: string;
   checkOutTime?: string;
+  actualAttendanceCount?: number;
+  equipmentUsage?: EquipmentUsageItem[];
   cancelledReason?: string;
   rejectedReason?: string;
   rejectedBy?: string;

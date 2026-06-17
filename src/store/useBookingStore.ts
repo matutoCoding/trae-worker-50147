@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { Booking, BookingFormData, BookingStatus } from '@/types/booking';
+import type { Booking, BookingFormData, BookingStatus, EquipmentUsageItem } from '@/types/booking';
 import { mockBookings } from '@/data/bookings';
 import { checkBookingConflict, checkTimeRangeValid } from '@/utils/conflict';
 import { createApprovalRecord, getBookingStatusForApprovalNode } from '@/utils/approvalFlow';
@@ -26,6 +26,8 @@ interface BookingState {
   updateBookingApproval: (id: string, updates: Partial<Booking>) => void;
   checkIn: (id: string) => void;
   checkOut: (id: string) => void;
+  updateActualAttendance: (id: string, count: number) => void;
+  updateEquipmentUsage: (id: string, equipmentUsage: EquipmentUsageItem[]) => void;
 }
 
 export const useBookingStore = create<BookingState>((set, get) => ({
@@ -193,6 +195,36 @@ export const useBookingStore = create<BookingState>((set, get) => ({
               ...b,
               status: 'completed',
               checkOutTime: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+            }
+          : b
+      )
+    }));
+  },
+
+  updateActualAttendance: (id, count) => {
+    console.log('[BookingStore] Updating actual attendance:', { id, count });
+    set((state) => ({
+      bookings: state.bookings.map((b) =>
+        b.id === id
+          ? {
+              ...b,
+              actualAttendanceCount: count,
+              updatedAt: new Date().toISOString()
+            }
+          : b
+      )
+    }));
+  },
+
+  updateEquipmentUsage: (id, equipmentUsage) => {
+    console.log('[BookingStore] Updating equipment usage:', { id, count: equipmentUsage.length });
+    set((state) => ({
+      bookings: state.bookings.map((b) =>
+        b.id === id
+          ? {
+              ...b,
+              equipmentUsage,
               updatedAt: new Date().toISOString()
             }
           : b

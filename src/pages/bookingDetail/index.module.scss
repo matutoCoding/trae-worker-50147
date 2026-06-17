@@ -358,3 +358,258 @@
   font-size: $font-size-md;
   color: $color-text-tertiary;
 }
+
+.quickActionCard {
+  background: linear-gradient(135deg, $color-success 0%, #73D13D 100%);
+  border-radius: $radius-lg;
+  padding: $spacing-lg $spacing-xl;
+  margin-bottom: $spacing-md;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: $color-text-white;
+  box-shadow: 0 8rpx 24rpx rgba($color-success, 0.25);
+
+  &.quickActionPurple {
+    background: linear-gradient(135deg, $color-booking-using 0%, #9254DE 100%);
+    box-shadow: 0 8rpx 24rpx rgba($color-booking-using, 0.25);
+  }
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}
+
+.quickActionLeft {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+}
+
+.quickActionIcon {
+  font-size: 56rpx;
+}
+
+.quickActionTitle {
+  display: block;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+  margin-bottom: 4rpx;
+}
+
+.quickActionDesc {
+  display: block;
+  font-size: $font-size-sm;
+  opacity: 0.9;
+}
+
+.quickActionArrow {
+  font-size: 48rpx;
+  opacity: 0.8;
+}
+
+.sectionHeaderRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-lg;
+}
+
+.sectionHeaderRow .sectionTitle {
+  margin-bottom: 0;
+}
+
+.editLink {
+  font-size: $font-size-sm;
+  color: $color-primary;
+  font-weight: $font-weight-medium;
+}
+
+.progressText {
+  font-size: $font-size-sm;
+  color: $color-primary;
+  font-weight: $font-weight-semibold;
+  margin-right: $spacing-sm;
+}
+
+.attendanceEdit {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.attendanceInput {
+  flex: 1;
+  height: 72rpx;
+  padding: 0 $spacing-md;
+  background-color: $color-bg-page;
+  border-radius: $radius-md;
+  font-size: $font-size-md;
+}
+
+.attendanceBtnGroup {
+  display: flex;
+  gap: $spacing-xs;
+}
+
+.btnSmallPrimary {
+  padding: $spacing-sm $spacing-lg;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  border-radius: $radius-md;
+  color: $color-text-white;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+}
+
+.btnSmallSecondary {
+  padding: $spacing-sm $spacing-lg;
+  border: 2rpx solid $color-border;
+  border-radius: $radius-md;
+  color: $color-text-secondary;
+  font-size: $font-size-sm;
+}
+
+.equipmentCount {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  font-weight: $font-weight-normal;
+  margin-left: $spacing-xs;
+}
+
+.initEquipmentBtn {
+  padding: $spacing-md;
+  background-color: rgba($color-primary, 0.08);
+  border-radius: $radius-md;
+  text-align: center;
+  color: $color-primary;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+}
+
+.equipmentList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+}
+
+.equipmentRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-md;
+  background-color: $color-bg-page;
+  border-radius: $radius-md;
+}
+
+.equipmentRowLeft {
+  flex: 1;
+  min-width: 0;
+}
+
+.eqName {
+  display: block;
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: 4rpx;
+}
+
+.eqStatusRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $spacing-xs;
+}
+
+.eqBorrowed {
+  font-size: $font-size-xs;
+  padding: 4rpx 12rpx;
+  background-color: rgba($color-warning, 0.1);
+  color: $color-warning;
+  border-radius: $radius-sm;
+}
+
+.eqReturned {
+  font-size: $font-size-xs;
+  padding: 4rpx 12rpx;
+  background-color: rgba($color-success, 0.1);
+  color: $color-success;
+  border-radius: $radius-sm;
+}
+
+.eqAvailable {
+  font-size: $font-size-xs;
+  padding: 4rpx 12rpx;
+  background-color: rgba($color-text-tertiary, 0.1);
+  color: $color-text-tertiary;
+  border-radius: $radius-sm;
+}
+
+.eqTime {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+}
+
+.btnEqBorrow {
+  padding: $spacing-xs $spacing-md;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  border-radius: $radius-sm;
+  color: $color-text-white;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+}
+
+.btnEqReturn {
+  padding: $spacing-xs $spacing-md;
+  background: linear-gradient(135deg, $color-success 0%, #73D13D 100%);
+  border-radius: $radius-sm;
+  color: $color-text-white;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+}
+
+.approvalNodeCurrent {
+  .nodeContent {
+    border: 2rpx solid rgba($color-warning, 0.3);
+    background-color: rgba($color-warning, 0.04);
+  }
+}
+
+.nodeDotCurrent {
+  animation: pulse 1.5s infinite;
+  transform: scale(1.1);
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba($color-warning, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8rpx rgba($color-warning, 0);
+  }
+}
+
+.nodeLineDone {
+  background-color: $color-success;
+}
+
+.nodeHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+}
+
+.nodeCurrentTag {
+  font-size: $font-size-xs;
+  padding: 4rpx 12rpx;
+  background-color: rgba($color-warning, 0.15);
+  color: $color-warning;
+  border-radius: $radius-sm;
+  font-weight: $font-weight-medium;
+}
+
+.nodeContentCurrent {
+  border: 2rpx solid rgba($color-warning, 0.3);
+  background-color: rgba($color-warning, 0.04);
+}
